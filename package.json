@@ -1,5 +1,5 @@
 {
-  "name": "roam-plugin-template",
+  "name": "roam-link-preview",
   "version": "0.0.0",
   "main": "extension.js",
   "scripts": {

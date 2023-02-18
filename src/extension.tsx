@@ -1,16 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { extension_helper } from "./helper";
+import { extension_helper, isValidUrl } from "./helper";
 import "./style.less";
 
 
 const { useState, useEffect } = React
 
-const isValidUrl = (url: string) => {
-  const regex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
-  const validUrl = regex.test(url);
-  return validUrl
-}
 
 const savecache = (url: string, obj: {}) => {
   localStorage.setItem(KEY + `-${url}`, JSON.stringify(obj))
@@ -137,9 +132,8 @@ function LinkPreview({ url }: { url: string }) {
               </div>
 
               <div className={'domain'}>
-                <span className={'link-url'}>{preview.siteName}</span>
                 <img className="link-favicon" src={preview.favicons?.[0]} />
-
+                <span className={'link-url'}>{url}</span>
               </div>
             </div>
             <div className={'link-image'}>

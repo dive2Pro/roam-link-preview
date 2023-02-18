@@ -7,6 +7,10 @@
 }
 
 .link-preview {
+    .link-favicon {
+        margin-right: 5px;
+    }
+
     .link-anchor {
         text-decoration: none;
     }
@@ -78,11 +82,15 @@
 
     .link-preview-section .link-description .domain .link-url {
         margin-right: 5px;
+        max-width: calc(100% - 20px);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
 
     .link-preview-section .link-description .domain .link-url,
     .link-preview-section .link-description .domain .link-url-loader {
-        font-size: 14px;
+        font-size: 12px;
     }
 
     .link-preview-section .link-description .domain .link-url-loader {
