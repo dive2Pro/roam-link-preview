@@ -8,19 +8,23 @@
 
 .link-preview {
     position: relative;
+
     .link-favicon {
         margin-right: 5px;
     }
+
     &:hover {
         .edit-btn {
             opacity: 1;
         }
     }
+
     .edit-btn {
         position: absolute;
         right: 0;
         opacity: 0;
     }
+
     .link-anchor {
         text-decoration: none;
     }
@@ -183,4 +187,21 @@
         width: 64px;
     }
 
+}
+
+@media only screen and (max-width: 600px) {
+    .link-preview {
+        .link-preview-section {
+            flex-direction: column-reverse;
+            height: 200px;
+            .link-image {
+                width: 100%;
+                height: 70%;
+            }
+            .link-description {
+                width: 100%;
+                padding: 5px;
+            }
+        }
+    }
 }

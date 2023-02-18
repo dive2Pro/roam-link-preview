@@ -162,6 +162,7 @@ function LinkPreview({ url, edit }: { url: string, edit: JSX.Element }) {
 const renderNode = (node: HTMLButtonElement) => {
   const block = node.closest("[id^='block-input']");
   if (!block) {
+    console.log(node, ' = block node')
     return
   }
   const uid = block.getAttribute("id").substr(-9);
@@ -170,8 +171,10 @@ const renderNode = (node: HTMLButtonElement) => {
   const linkPreviewElements = Array.from(block.querySelectorAll(".rm-xparser-default-link-preview"))
   let result = reg.exec(str);
   let index = 0;
-  while (result) {
-    const url = result[2]
+  while (result && linkPreviewElements.length) {
+    const url = result[2];
+    // console.log(linkPreviewElements[index], url, result, linkPreviewElements, block, );
+    // console.log(linkPreviewElements[index].parentElement, '@@')
     ReactDOM.render(<LinkPreview url={url} edit={
       <EditIcon onClick={() => {
         clickOnEl(block)
@@ -185,7 +188,10 @@ const renderNode = (node: HTMLButtonElement) => {
 const process = (node: Node) => {
   Array.from((node as HTMLElement)?.querySelectorAll(".bp3-button")).filter(d => d.tagName === 'BUTTON')
     .forEach(d => {
-      renderNode(d as HTMLButtonElement);
+      setTimeout(() => {
+        renderNode(d as HTMLButtonElement);
+
+      }, 10)
     })
 }
 
