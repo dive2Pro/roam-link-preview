@@ -35,3 +35,17 @@ export const isValidUrl = (url: string) => {
   const validUrl = regex.test(url);
   return validUrl
 }
+
+
+export const clickOnEl = (el: Element) => {
+  "mouseover mousedown mouseup click".split(" ").forEach((type) => {
+    el.dispatchEvent(
+      new MouseEvent(type, {
+        view: window,
+        bubbles: true,
+        cancelable: true,
+        buttons: 1
+      })
+    );
+  });
+}

@@ -7,10 +7,20 @@
 }
 
 .link-preview {
+    position: relative;
     .link-favicon {
         margin-right: 5px;
     }
-
+    &:hover {
+        .edit-btn {
+            opacity: 1;
+        }
+    }
+    .edit-btn {
+        position: absolute;
+        right: 0;
+        opacity: 0;
+    }
     .link-anchor {
         text-decoration: none;
     }

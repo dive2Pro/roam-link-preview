@@ -1,6 +1,7 @@
+import { Button } from "@blueprintjs/core";
 import React from "react";
 import ReactDOM from "react-dom";
-import { extension_helper, isValidUrl } from "./helper";
+import { clickOnEl, extension_helper, isValidUrl } from "./helper";
 import "./style.less";
 
 
@@ -43,7 +44,15 @@ type Response = {
   videos: string[]
 }
 
-function LinkPreview({ url }: { url: string }) {
+function EditIcon(props: { onClick: () => void }) {
+  return <Button icon="edit" small className="edit-btn" onClick={e => {
+    e.stopPropagation();
+    e.preventDefault();
+    props.onClick();
+  }} />
+}
+
+function LinkPreview({ url, edit }: { url: string, edit: JSX.Element }) {
   let [loading, setLoading] = useState(true)
   const [preview, setPreviewData] = useState({} as Response)
   const [isUrlValid, setUrlValidation] = useState(false)
@@ -89,10 +98,10 @@ function LinkPreview({ url }: { url: string }) {
   if (loading) {
     return (
       <div className="link-preview">
-
         <div
           className={`link-preview-section link-image-loader`}
         >
+          {edit}
 
           <div className={`link-description`}>
 
@@ -119,6 +128,7 @@ function LinkPreview({ url }: { url: string }) {
     return (
       <div className="link-preview">
         <a target="_blank" href={url} className='link-anchor'>
+          {edit}
           <div
             className={'link-preview-section'}
           >
@@ -162,8 +172,11 @@ const renderNode = (node: HTMLButtonElement) => {
   let index = 0;
   while (result) {
     const url = result[2]
-    console.log(url, ' --- url')
-    ReactDOM.render(<LinkPreview url={url} />, linkPreviewElements[index++].parentElement)
+    ReactDOM.render(<LinkPreview url={url} edit={
+      <EditIcon onClick={() => {
+        clickOnEl(block)
+      }} />
+    } />, linkPreviewElements[index++].parentElement)
     result = reg.exec(str);
   }
 
