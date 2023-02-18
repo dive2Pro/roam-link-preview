@@ -1,15 +1,200 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { extension_helper } from "./helper";
 import "./style.less";
 
-export default function Extension() {
-  return (
-    <div className="extension-template">
-      <h1>Hello Roam</h1>
-    </div>
-  );
+
+const { useState, useEffect } = React
+
+const isValidUrl = (url: string) => {
+  const regex = /((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&;%@.\w_]*)#?(?:[\w]*))?)/
+  const validUrl = regex.test(url);
+  return validUrl
 }
 
+const savecache = (url: string, obj: {}) => {
+  localStorage.setItem(KEY + `-${url}`, JSON.stringify(obj))
+}
+
+const KEY = 'roam-rich-card'
+
+const loadcache = (url: string) => {
+  const cache = localStorage.getItem(KEY + `-${url}`)
+  if (cache) {
+    // console.log(cache, ' - cache')
+    return JSON.parse(cache)
+  }
+}
+
+// let headers = {} as Record<string, string>
+
+let headers = new Headers();
+
+headers.append('Content-Type', 'application/json');
+headers.append('Accept', 'application/json');
+
+headers.append('Access-Control-Allow-Origin', 'http://roamresearch');
+headers.append('Access-Control-Allow-Credentials', 'true');
+
+type Response = {
+  contentType: string;
+  description: string;
+  favicons: string[]
+  images: string[]
+  mediaType: string;
+  siteName: string;
+  title: string
+  url: string;
+  videos: string[]
+}
+
+function LinkPreview({ url }: { url: string }) {
+  let [loading, setLoading] = useState(true)
+  const [preview, setPreviewData] = useState({} as Response)
+  const [isUrlValid, setUrlValidation] = useState(false)
+
+
+  useEffect(() => {
+    async function fetchData() {
+
+      const fetch = window.fetch
+      if (isValidUrl(url)) {
+        setUrlValidation(true)
+      } else {
+        return {}
+      }
+      console.log('loading: ', url)
+      setLoading(true)
+
+      const cache = await loadcache(url)
+      if (cache) {
+        setPreviewData(cache)
+      } else {
+        const response = await fetch(`https://preview-link-phi.vercel.app/api/preview-link?url=${url}`, {
+        })
+        // const response = getLinkPreview(url, { headers })
+        const data = await response.json()
+        setPreviewData(data)
+        savecache(url, data)
+      }
+      setLoading(false)
+
+    }
+    fetchData()
+  }, [url])
+
+  if (!isUrlValid) {
+    console.warn(
+      'LinkPreview Error: You need to provide url in props to render the component', url
+    )
+    return null
+  }
+
+  // If the user wants to use its own element structure with the fetched data
+  if (loading) {
+    return (
+      <div className="link-preview">
+
+        <div
+          className={`link-preview-section link-image-loader`}
+        >
+
+          <div className={`link-description`}>
+
+            <div className={`link-data`}>
+              <div className={`link-title`}></div>
+              <div className={'link-description-content '}>
+              </div>
+            </div>
+
+            <div className={'domain'}>
+              {/* <img className="" src={""} /> */}
+
+            </div>
+          </div>
+          <div className={'link-image'}>
+
+          </div>
+
+        </div>
+      </div>
+
+    )
+  } else {
+    return (
+      <div className="link-preview">
+        <a target="_blank" href={url} className='link-anchor'>
+          <div
+            className={'link-preview-section'}
+          >
+            <div className={'link-description'}>
+
+              <div className={'link-data'}>
+                <div className={'link-title'}>{preview.title}</div>
+                <div className={'link-description-content'}>
+                  {preview.description}
+                </div>
+              </div>
+
+              <div className={'domain'}>
+                <span className={'link-url'}>{preview.siteName}</span>
+                <img className="link-favicon" src={preview.favicons?.[0]} />
+
+              </div>
+            </div>
+            <div className={'link-image'}>
+              {preview.images.length && <img src={preview.images[0]} alt={preview.description} />}
+            </div>
+
+          </div>
+        </a>
+      </div>
+
+    )
+  }
+}
+
+
+const renderNode = (node: HTMLButtonElement) => {
+  const block = node.closest("[id^='block-input']");
+  if (!block) {
+    return
+  }
+  const uid = block.getAttribute("id").substr(-9);
+  const str = window.roamAlphaAPI.pull("[:block/string]", [":block/uid", uid])[":block/string"]
+  const reg = /{{link-preview(:*) (.+)}}/gi;
+  const linkPreviewElements = Array.from(block.querySelectorAll(".rm-xparser-default-link-preview"))
+  let result = reg.exec(str);
+  let index = 0;
+  while (result) {
+    const url = result[2]
+    console.log(url, ' --- url')
+    ReactDOM.render(<LinkPreview url={url} />, linkPreviewElements[index++].parentElement)
+    result = reg.exec(str);
+  }
+
+}
+
+const process = (node: Node) => {
+  Array.from((node as HTMLElement)?.querySelectorAll(".bp3-button")).filter(d => d.tagName === 'BUTTON')
+    .forEach(d => {
+      renderNode(d as HTMLButtonElement);
+    })
+}
+
+const isNode = (node: HTMLElement) => node.innerHTML
 export function initExtension() {
-  console.log("init extension");
+  const observer = new MutationObserver((ms) => {
+    ms.forEach(m => {
+      m.addedNodes.forEach(node => {
+        isNode(node as HTMLElement) && process(node);
+      }
+      )
+    })
+  });
+  process(document.body);
+  observer.observe(document.body, { childList: true, subtree: true });
+  extension_helper.on_uninstall(() => {
+    observer.disconnect();
+  })
 }
