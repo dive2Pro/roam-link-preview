@@ -13,6 +13,7 @@ jobs:
       USER: 'dive2Pro'
       EMAIL: 'toylucklebo@gmail.com'
       BRANCH: 'link-preview'
+      EXTENSION_DIR: 'extensions/hyc'
       EXTENSION_JSON: 'extensions/hyc/roam-link-preview.json'
     steps:
       - name: Checkout repository
@@ -43,9 +44,20 @@ jobs:
         run: |
           git checkout -b ${{env.BRANCH}} origin/main
 
-      - name: Update $EXTENSION_JSON
+      - name: Update $EXTENSION_DIR
         run: |
-          sed -i 's/"source_commit": ".*/"source_commit": "'"$GITHUB_SHA"'",/g' $EXTENSION_JSON
+          mkdir ${{ env.EXTENSION_DIR }} || true
+          cat <<EOF > ${{ env.EXTENSION_JSON }}
+              {
+                "name": "Link Preview",
+                "short_description": "",
+                "author": "hyc",
+                "source_url": "${{ github.repository }}",
+                "source_repo": "${{ github.repository }}.git",
+                "source_commit": "${{env.GITHUB_SHA}}",
+                "stripe_account": "acct_1LLkJkQbYbNOfzpa"
+              }            
+          EOF
 
       - name: Commit and Push changes
         run: |
