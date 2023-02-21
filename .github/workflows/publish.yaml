@@ -81,4 +81,3 @@ jobs:
               base,
             });
             console.log(`PR created: ${pullRequest.html_url}`);
-:
