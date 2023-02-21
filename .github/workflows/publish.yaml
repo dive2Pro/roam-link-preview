@@ -9,7 +9,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     env:
-      FORK: 'dive2Pro'
+      FORK: '${{ github.repository_owner }}'
       USER: 'dive2Pro'
       EMAIL: 'toylucklebo@gmail.com'
       BRANCH: 'link-preview'
@@ -52,8 +52,8 @@ jobs:
                 "name": "Link Preview",
                 "short_description": "Show brief information for external links in roam",
                 "author": "hyc",
-                "source_url": "https://github.com/${{ github.repository }}",
-                "source_repo": "https://github.com/${{ github.repository }}.git",
+                "source_url": "${{github.server_url}}/${{ github.repository }}",
+                "source_repo": "${{github.server_url}}/${{ github.repository }}.git",
                 "source_commit": "$GITHUB_SHA",
                 "stripe_account": "acct_1LLkJkQbYbNOfzpa"
               }            
