@@ -50,11 +50,11 @@ jobs:
           cat <<EOF > ${{ env.EXTENSION_JSON }}
               {
                 "name": "Link Preview",
-                "short_description": "",
+                "short_description": "Show brief information for external links in roam",
                 "author": "hyc",
-                "source_url": "${{ github.repository }}",
-                "source_repo": "${{ github.repository }}.git",
-                "source_commit": "${{env.GITHUB_SHA}}",
+                "source_url": "https://github.com/${{ github.repository }}",
+                "source_repo": "https://github.com/${{ github.repository }}.git",
+                "source_commit": "$GITHUB_SHA",
                 "stripe_account": "acct_1LLkJkQbYbNOfzpa"
               }            
           EOF
