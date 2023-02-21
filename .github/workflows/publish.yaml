@@ -57,6 +57,7 @@ jobs:
 
       - name: Commit and Push changes
         run: |
+          git pull
           git add ${{ env.EXTENSION_JSON }}
           git commit -m "Update source_commit to $GITHUB_SHA"
           git push -u origin ${{ env.BRANCH }}
