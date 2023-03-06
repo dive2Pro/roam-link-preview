@@ -61,19 +61,19 @@ export function hasURLsCanWorkWithLinkPreview(input: string) {
     });
     return '';
   })
-  
+
   let index = 0;
-  return splitStrings1.some(item => {
+  return splitStrings1.length ? splitStrings1.some(item => {
     console.log(item, ' --', input.substring(index, item.start))
     const r = input.substring(index, item.start).match(/(https?:\/\/[^\s]+)/g)
     index = item.end
     return r;
-  })
+  }) : input.match(/(https?:\/\/[^\s]+)/g)
 }
 
 export function replaceURLsWithLinkPreviews(input: string) {
   const pattern = /\[.*?\]\(.*?\)|\{{2}.*?\}{2}/g;
-  const splitStrings1: { sub: string,  start: number, end: number }[] = [];
+  const splitStrings1: { sub: string, start: number, end: number }[] = [];
   input.replace(pattern, (sub, index) => {
     splitStrings1.push({
       sub,
@@ -83,18 +83,24 @@ export function replaceURLsWithLinkPreviews(input: string) {
     return '';
   })
 
-  const splitStrings2: {type: string, content: string}[] = [];
-  let index = 0;
+  const splitStrings2: { type: string, content: string }[] = [];
+  if (splitStrings1.length) {
 
-  splitStrings1.forEach(item => {
-    splitStrings2.push({ type: 'text', content: input.substring(index, item.start) });
-    splitStrings2.push({ type: 'match', content: item.sub });
-    index = item.end
-  })
-  splitStrings2.push({
-    type: 'text',
-    content: input.substring(index)
-  })
+    let index = 0;
+
+    splitStrings1.forEach(item => {
+      splitStrings2.push({ type: 'text', content: input.substring(index, item.start) });
+      splitStrings2.push({ type: 'match', content: item.sub });
+      index = item.end
+    })
+    splitStrings2.push({
+      type: 'text',
+      content: input.substring(index)
+    })
+  } else {
+    splitStrings2.push({ type: 'text', content: input })
+  }
+
   // console.log(splitStrings2, ' = 2')
 
   const result = splitStrings2.map(item => {
