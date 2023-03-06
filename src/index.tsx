@@ -49,8 +49,8 @@ function onload({ extensionAPI }: { extensionAPI: RoamExtensionAPI }) {
         }
       })
     },
+    // @ts-ignore
     'display-conditional': (e) => {
-
       return hasURLsCanWorkWithLinkPreview(e["block-string"]);
     }
   });
