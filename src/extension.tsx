@@ -162,16 +162,21 @@ function LinkPreview({ url, edit }: { url: string, edit: JSX.Element }) {
 const renderNode = (node: HTMLButtonElement) => {
   const block = node.closest("[id^='block-input']");
   if (!block) {
-    console.log(node, ' = block node')
     return
   }
-  const uid = block.getAttribute("id").substr(-9);
-  const str = window.roamAlphaAPI.pull("[:block/string]", [":block/uid", uid])[":block/string"]
+  let uid = block.getAttribute("id").substr(-9);
   const reg = /{{link-preview(:*) (.+)}}/gi;
   const linkPreviewElements = Array.from(block.querySelectorAll(".rm-xparser-default-link-preview"))
-  let result = reg.exec(str);
   let index = 0;
-  while (result && linkPreviewElements.length) {
+  while (linkPreviewElements.length) {
+    const linkButton = linkPreviewElements[index];
+    const rmRef = linkButton.closest(".rm-block-ref")
+    if (rmRef) {
+      uid = rmRef.getAttribute("data-uid")
+    }
+    const str = window.roamAlphaAPI.pull("[:block/string]", [":block/uid", uid])[":block/string"]
+
+    let result = reg.exec(str);
     const url = result[2];
     // console.log(linkPreviewElements[index], url, result, linkPreviewElements, block, );
     // console.log(linkPreviewElements[index].parentElement, '@@')
@@ -181,6 +186,9 @@ const renderNode = (node: HTMLButtonElement) => {
       }} />
     } />, linkPreviewElements[index++].parentElement)
     result = reg.exec(str);
+    if (!result) {
+      break
+    }
   }
 
 }
