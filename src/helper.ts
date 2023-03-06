@@ -49,3 +49,42 @@ export const clickOnEl = (el: Element) => {
     );
   });
 }
+
+export function hasURLsCanWorkWithLinkPreview(str: string) {
+  let regex = /(\[.+?\]|\(.+?\)|{{.+?}})/g;
+  let matches: { start: number, end: number }[] = [];
+  let offset = 0;
+  let result = str.replace(regex, (match, ss, index) => {
+    console.log(match, index, ss)
+    matches.push({ start: index - offset, end: index + match.length - 1 - offset });
+    offset += match.length;
+    return '';
+  });
+  regex = /(https?:\/\/[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/ig;
+  return regex.test(result)
+}
+
+export function replaceURLsWithLinkPreviews(str: string) {
+  // Step 1: Remove brackets and their contents, and record their positions
+  let regex = /(\[.+?\]|\(.+?\)|{{.+?}})/g;
+  let matches: {start: number, end: number }[] = [];
+  let offset = 0;
+  let result = str.replace(regex, (match, ss, index) => {
+    console.log(match, index, ss)
+    matches.push({ start: index - offset, end: index + match.length - 1 - offset });
+    offset += match.length;
+    return '';
+  });
+
+  // Step 2: Match URLs and replace them with link preview tags
+  regex = /(https?:\/\/[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/ig;
+  result = result.replace(regex, '{{link-preview $&}}');
+  // Step 3: Restore removed brackets and their contents
+  matches.forEach(({ start, end }) => {
+    const removed = str.slice(start, end + 1);
+    result = result.slice(0, start) + removed + result.slice(start);
+  });
+
+  return result;
+}
+

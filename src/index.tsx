@@ -1,4 +1,4 @@
-import { extension_helper, isValidUrl } from "./helper";
+import { extension_helper, hasURLsCanWorkWithLinkPreview, isValidUrl, replaceURLsWithLinkPreviews } from "./helper";
 import { initExtension } from "./extension";
 import { Toaster } from '@blueprintjs/core'
 
@@ -39,6 +39,22 @@ function onload({ extensionAPI }: { extensionAPI: RoamExtensionAPI }) {
 
       }
     })
+  window.roamAlphaAPI.ui.blockContextMenu.addCommand({
+    label: 'Convert link to Link Preview',
+    'callback': (e) => { 
+      window.roamAlphaAPI.updateBlock({
+        block: {
+          string: replaceURLsWithLinkPreviews(e["block-string"]),
+          uid: e["block-uid"]
+        }
+      })
+    },
+    'display-conditional': (e) => {
+      
+      return hasURLsCanWorkWithLinkPreview(e["block-string"]);
+    }
+  });
+
 }
 
 function onunload() {
