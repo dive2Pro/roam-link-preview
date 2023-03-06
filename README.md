@@ -21,8 +21,12 @@
 
 2. You can write the currently copied link into Roam using a custom shortcut key
 
+![image](https://user-images.githubusercontent.com/23192045/219956992-d574628e-959d-4247-be9b-b3a3d6c81e16.png)
+
 3. You can use the context block menu to transform all links in the entire block.
 
+![image](https://user-images.githubusercontent.com/23192045/223105097-8920f688-d22e-477c-af7e-461179d4dc47.png)
 
-![image](https://user-images.githubusercontent.com/23192045/219956992-d574628e-959d-4247-be9b-b3a3d6c81e16.png)
+
+
 
