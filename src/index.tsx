@@ -40,8 +40,8 @@ function onload({ extensionAPI }: { extensionAPI: RoamExtensionAPI }) {
       }
     })
   window.roamAlphaAPI.ui.blockContextMenu.addCommand({
-    label: 'Convert link to Link Preview',
-    'callback': (e) => { 
+    label: 'Convert Link to Link Card',
+    'callback': (e) => {
       window.roamAlphaAPI.updateBlock({
         block: {
           string: replaceURLsWithLinkPreviews(e["block-string"]),
@@ -50,11 +50,15 @@ function onload({ extensionAPI }: { extensionAPI: RoamExtensionAPI }) {
       })
     },
     'display-conditional': (e) => {
-      
+
       return hasURLsCanWorkWithLinkPreview(e["block-string"]);
     }
   });
-
+  extension_helper.on_uninstall(() => {
+    window.roamAlphaAPI.ui.blockContextMenu.removeCommand({
+      label: 'Convert Link to Link Card',
+    })
+  })
 }
 
 function onunload() {

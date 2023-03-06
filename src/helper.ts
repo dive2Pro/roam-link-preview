@@ -50,40 +50,69 @@ export const clickOnEl = (el: Element) => {
   });
 }
 
-export function hasURLsCanWorkWithLinkPreview(str: string) {
-  let regex = /(\[.+?\]|\(.+?\)|{{.+?}})/g;
-  let matches: { start: number, end: number }[] = [];
-  let offset = 0;
-  let result = str.replace(regex, (match, ss, index) => {
-    console.log(match, index, ss)
-    matches.push({ start: index - offset, end: index + match.length - 1 - offset });
-    offset += match.length;
+export function hasURLsCanWorkWithLinkPreview(input: string) {
+  const pattern = /\[.*?\]\(.*?\)|\{{2}.*?\}{2}/g;
+  const splitStrings1: { sub: string, start: number, end: number }[] = [];
+  input.replace(pattern, (sub, index) => {
+    splitStrings1.push({
+      sub,
+      start: index,
+      end: index + sub.length,
+    });
     return '';
-  });
-  regex = /(https?:\/\/[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/ig;
-  return regex.test(result)
+  })
+  
+  let index = 0;
+  return splitStrings1.some(item => {
+    console.log(item, ' --', input.substring(index, item.start))
+    const r = input.substring(index, item.start).match(/(https?:\/\/[^\s]+)/g)
+    index = item.end
+    return r;
+  })
 }
 
-export function replaceURLsWithLinkPreviews(str: string) {
-  // Step 1: Remove brackets and their contents, and record their positions
-  let regex = /(\[.+?\]|\(.+?\)|{{.+?}})/g;
-  let matches: {start: number, end: number }[] = [];
-  let offset = 0;
-  let result = str.replace(regex, (match, ss, index) => {
-    console.log(match, index, ss)
-    matches.push({ start: index - offset, end: index + match.length - 1 - offset });
-    offset += match.length;
+export function replaceURLsWithLinkPreviews(input: string) {
+  const pattern = /\[.*?\]\(.*?\)|\{{2}.*?\}{2}/g;
+  const splitStrings1: { sub: string,  start: number, end: number }[] = [];
+  input.replace(pattern, (sub, index) => {
+    splitStrings1.push({
+      sub,
+      start: index,
+      end: index + sub.length,
+    });
     return '';
-  });
+  })
 
-  // Step 2: Match URLs and replace them with link preview tags
-  regex = /(https?:\/\/[\w-]+(\.[\w-]+)+\.?(:\d+)?(\/\S*)?)/ig;
-  result = result.replace(regex, '{{link-preview $&}}');
-  // Step 3: Restore removed brackets and their contents
-  matches.forEach(({ start, end }) => {
-    const removed = str.slice(start, end + 1);
-    result = result.slice(0, start) + removed + result.slice(start);
-  });
+  const splitStrings2: {type: string, content: string}[] = [];
+  let index = 0;
+
+  splitStrings1.forEach(item => {
+    splitStrings2.push({ type: 'text', content: input.substring(index, item.start) });
+    splitStrings2.push({ type: 'match', content: item.sub });
+    index = item.end
+  })
+  splitStrings2.push({
+    type: 'text',
+    content: input.substring(index)
+  })
+  // console.log(splitStrings2, ' = 2')
+
+  const result = splitStrings2.map(item => {
+    if (item.type === 'match') {
+      return item.content
+    }
+    if (item.type === 'text') {
+      const linkPattern = /(https?:\/\/[^\s]+)/g;
+      const linkMatch = item.content.match(linkPattern);
+      console.log(linkMatch, ' = match')
+      if (linkMatch) {
+        const link = linkMatch[0];
+        const newMatch = item.content.replace(link, `{{link-preview ${link}}}`);
+        return newMatch
+      }
+      return item.content
+    }
+  }).join("")
 
   return result;
 }
