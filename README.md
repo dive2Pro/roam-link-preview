@@ -3,11 +3,13 @@
 > Show brief information for external links in roam
 
 
+- normal version
 
-![image](https://user-images.githubusercontent.com/23192045/219956966-43781827-285d-4b66-a493-cdfdd7ea2c01.png)
+![image](https://user-images.githubusercontent.com/23192045/224233558-963c1acf-b40a-49ec-ac3a-1cc142f506a0.png)
 
-![image](https://user-images.githubusercontent.com/23192045/219956975-20999ad0-f2ff-4a60-8891-9ee766a7c348.png)
+- mobile version
 
+![image](https://user-images.githubusercontent.com/23192045/224233592-f7445a78-2c2c-417b-a5b2-8d2dba49e5a5.png)
 
 
 
