@@ -45,6 +45,9 @@ interface Window {
       uploadFile: (title: string) => Date;
     };
     data: {
+      async: {
+        q: (query: string) => Promise<unknown[][]>;
+      };
       addPullWatch: AddPullWatch;
       block: {
         create: WriteAction;
@@ -127,6 +130,18 @@ interface Window {
       getFocusedBlock: () => null | {
         "window-id": string;
         "block-uid": string;
+      };
+      slashCommand: {
+        addCommand: (action: {
+          label: string;
+          callback: (args: {
+            "block-uid": string;
+            "window-id": string;
+          }) => void;
+        }) => void;
+        removeCommand: (action: {
+          label: string;
+        }) => void;
       };
       components: {
         renderBlock: (args: {
