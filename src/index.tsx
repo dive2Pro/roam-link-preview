@@ -5,7 +5,7 @@ import {
   replaceURLsWithLinkPreviews,
 } from "./helper";
 import { initExtension } from "./extension";
-import { Toaster } from "@blueprintjs/core";
+import { showToast } from "./toast";
 
 function onload({ extensionAPI }: { extensionAPI: RoamExtensionAPI }) {
   initExtension();
@@ -18,7 +18,7 @@ function onload({ extensionAPI }: { extensionAPI: RoamExtensionAPI }) {
       ) as unknown as string;
       const link = await navigator.clipboard.readText();
       if (!isValidUrl(link)) {
-        Toaster.create().show({
+        showToast({
           intent: "warning",
           message: `${link} is not a valid link`,
         });
@@ -62,21 +62,28 @@ function onload({ extensionAPI }: { extensionAPI: RoamExtensionAPI }) {
     label: "Link Preview: Covert Link to Link Card",
     callback: (args) => {
       const blockUid = args["block-uid"];
-      window.roamAlphaAPI.data.async
-        .q(
-          `[:find ?s . :where [?b :block/uid "${blockUid}"] [?b :block/string ?s]]`
-        )
-        .then((res) => res as unknown as string)
-        .then((blockString) => {
-          const newString = replaceURLsWithLinkPreviews(blockString);
+      const result = window.roamAlphaAPI.q(
+        `[:find ?s . :where [?b :block/uid "${blockUid}"] [?b :block/string ?s]]`
+      );
+      // `q` can hand back a nested array depending on the Roam build, so
+      // normalise before treating it as the block string.
+      const blockString = Array.isArray(result) ? result[0] : result;
 
-          window.roamAlphaAPI.updateBlock({
-            block: {
-              string: newString,
-              uid: blockUid,
-            },
-          });
-        });
+      if (typeof blockString !== "string" || !blockString) {
+        return "";
+      }
+
+      const newString = replaceURLsWithLinkPreviews(blockString);
+      if (newString === blockString) {
+        return "";
+      }
+
+      window.roamAlphaAPI.updateBlock({
+        block: {
+          string: newString,
+          uid: blockUid,
+        },
+      });
       return "";
     },
   });

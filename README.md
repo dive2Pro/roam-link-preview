@@ -41,8 +41,24 @@ Create a link preview manually by using the custom component syntax with the URL
 ### Method 4: Slash Command
 1. Type `/` in any block
 2. Search for "Link Preview: Covert Link to Link Card"
-3. Execute the command to convert all URLs in the block to preview cards
+3. Execute the command to convert **all** URLs in the block to preview cards
 
+### Method 5: Card Actions
+Hover over any link card to reveal the action buttons in the top-right corner:
+
+- **Edit** (pencil) — focus the block that owns the card
+- **Copy link** (duplicate) — copy the card's URL to the clipboard
+- **Turn back into plain URL** (undo) — replace the card with its bare URL
+
+Each card is handled independently: with several cards in one block, the actions
+only affect the card you clicked.
+
+### Graceful degradation
+
+If the preview service is unreachable or slow (15s timeout), the card falls back
+to a plain link showing the URL instead of rendering an empty box, so the block
+stays usable. Pages without an `og:image` — or whose image uses a
+protocol-relative `//host/...` URL — are handled without breaking the card.
 
 
 

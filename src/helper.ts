@@ -36,6 +36,71 @@ export const isValidUrl = (url: string) => {
   return validUrl
 }
 
+/**
+ * Matches a single `{{link-preview <url>}}` component.
+ *
+ * The `[^}]+` body intentionally stops at the first `}` (unlike the greedy
+ * `(.+)` used elsewhere) so that two adjacent components on the same block are
+ * never swallowed into one match. The closing brace accepts both `}` and `}}`
+ * so a non-standard `{{link-preview: url}}` written by hand is still matched.
+ */
+const LINK_PREVIEW_RE = /\{\{link-preview:?\s+([^}]+?)\s*\}\}?/gi;
+
+/** Extract every link-preview component (with its URL) from a block string, in order. */
+export const extractLinkPreviews = (input: string) => {
+  const matches: { start: number; end: number; raw: string; url: string }[] = [];
+  let m: RegExpExecArray | null;
+  LINK_PREVIEW_RE.lastIndex = 0;
+  while ((m = LINK_PREVIEW_RE.exec(input)) !== null) {
+    matches.push({
+      start: m.index,
+      end: m.index + m[0].length,
+      raw: m[0],
+      url: m[1],
+    });
+    // Guard against a zero-length match looping forever.
+    if (m.index === LINK_PREVIEW_RE.lastIndex) {
+      LINK_PREVIEW_RE.lastIndex++;
+    }
+  }
+  return matches;
+};
+
+/**
+ * Remove the `index`-th link-preview component from a block string, leaving the
+ * bare URL behind so the text is still useful ("还原为 URL").
+ *
+ * When `expectedUrl` is provided and the indexed component does not match it,
+ * we fall back to the first component whose URL does — this keeps the action
+ * correct even if the rendered order drifted from the stored order.
+ */
+export const restoreLinkPreviewByIndex = (
+  input: string,
+  index: number,
+  expectedUrl?: string
+) => {
+  const matches = extractLinkPreviews(input);
+  if (!matches.length) {
+    return { string: input, restored: false };
+  }
+
+  let target = matches[index];
+
+  if (expectedUrl && (!target || target.url !== expectedUrl)) {
+    target = matches.find((item) => item.url === expectedUrl);
+  }
+  if (!target) {
+    return { string: input, restored: false };
+  }
+
+  const next = input.slice(0, target.start) + target.url + input.slice(target.end);
+  return { string: next, restored: true };
+};
+
+/** True when the block string contains at least one link-preview component. */
+export const hasLinkPreviewComponent = (input: string) =>
+  extractLinkPreviews(input).length > 0;
+
 
 export const clickOnEl = (el: Element) => {
   "mouseover mousedown mouseup click".split(" ").forEach((type) => {
@@ -64,7 +129,6 @@ export function hasURLsCanWorkWithLinkPreview(input: string) {
 
   let index = 0;
   return splitStrings1.length ? splitStrings1.some(item => {
-    console.log(item, ' --', input.substring(index, item.start))
     const r = input.substring(index, item.start).match(/(https?:\/\/[^\s]+)/g)
     index = item.end
     return r;
@@ -101,22 +165,15 @@ export function replaceURLsWithLinkPreviews(input: string) {
     splitStrings2.push({ type: 'text', content: input })
   }
 
-  // console.log(splitStrings2, ' = 2')
-
   const result = splitStrings2.map(item => {
     if (item.type === 'match') {
       return item.content
     }
     if (item.type === 'text') {
-      const linkPattern = /(https?:\/\/[^\s]+)/g;
-      const linkMatch = item.content.match(linkPattern);
-      console.log(linkMatch, ' = match')
-      if (linkMatch) {
-        const link = linkMatch[0];
-        const newMatch = item.content.replace(link, `{{link-preview ${link}}}`);
-        return newMatch
-      }
-      return item.content
+      // NOTE: must replace EVERY url in the segment, not just the first one.
+      // Using a non-global `String.replace(link, ...)` only converted one url
+      // per text run, so a block with several links was only partly converted.
+      return item.content.replace(/(https?:\/\/[^\s]+)/g, (link) => `{{link-preview ${link}}}`)
     }
   }).join("")
 

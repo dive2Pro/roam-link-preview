@@ -17,11 +17,37 @@
         .edit-btn {
             opacity: 1;
         }
+
+        .link-actions {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    }
+
+    // Action group sits underneath the edit (pencil) icon, top-right.
+    .link-actions {
+        position: absolute;
+        right: 0;
+        top: 32px;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease-in-out;
+    }
+
+    .link-action-btn {
+        min-height: 22px;
+        min-width: 22px;
+        padding: 0;
     }
 
     .edit-btn {
         position: absolute;
         right: 0;
+        z-index: 2;
         opacity: 0;
     }
 
@@ -44,6 +70,28 @@
             "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
             "Helvetica Neue", sans-serif;
         height: 113px;
+    }
+
+    // Shown when the preview service is unreachable — keeps the block usable
+    // instead of rendering an empty card.
+    .link-preview-fallback {
+        height: auto;
+        min-height: 56px;
+        align-items: center;
+
+        .link-description {
+            width: 100%;
+            padding: 10px 15px;
+        }
+
+        .link-title {
+            font-size: 13px !important;
+            font-weight: 500 !important;
+            color: inherit !important;
+            word-break: break-all;
+            white-space: normal !important;
+            max-height: none !important;
+        }
     }
 
     .link-image-loader {
